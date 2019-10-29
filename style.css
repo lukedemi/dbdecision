@@ -1,0 +1,89 @@
+a {
+  text-decoration: underline;
+  color: #000;
+}
+
+a.white {
+  text-decoration: underline;
+  color: #FFF;
+}
+
+body {
+  counter-reset: footnotecounter;
+}
+
+.center {
+  margin: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+span.footnote:before {
+  counter-increment: footnotecounter;
+  content: counter(footnotecounter);
+  position: relative;
+  top: -0.4em;
+  color: #000;
+  font-size: 10px;
+}
+
+.tg {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-left: 20%;
+  margin-right: 20%;
+}
+
+.tg td {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  padding: 10px 5px;
+  border-style: solid;
+  border-width: 1px;
+  overflow: hidden;
+  word-break: normal;
+  border-color: black;
+}
+
+.tg th {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  padding: 10px 5px;
+  border-style: solid;
+  border-width: 1px;
+  overflow: hidden;
+  word-break: normal;
+  border-color: black;
+}
+
+.tg .tg-header {
+  text-align: center;
+  vertical-align: middle;
+  font-family: Arial, sans-serif;
+  font-size: 20px;
+}
+
+.tg .tg-cly1 {
+  text-align: left;
+  vertical-align: top;
+}
+
+.tg .tg-0lax {
+  text-align: left;
+  vertical-align: top;
+}
+
+@media only screen and (max-width: 1200px) {
+  .tg {
+    margin-left: 0%;
+    margin-right: 0%;
+  }
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 2000px) {
+  .tg {
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+}

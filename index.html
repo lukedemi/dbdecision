@@ -1,0 +1,128 @@
+<html>
+  <head>
+    <title>AWS Database Decision</title>
+    <link rel='icon' href='favicon.ico' type='image/x-icon'/ >
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            jQuery('[data-toggle="tooltip"]').each(function() {
+                var $elem = jQuery(this);
+                $elem.tooltip({
+                    html: true,
+                    container: $elem,
+                    delay: {hide:400}
+                });
+            });
+        });
+    </script>
+  </head>
+  <body>
+    <table class="tg">
+      <tr>
+        <th width="50%" class="tg-header">
+          <img src='dynamodb.png' style='width:27px;height:30px;'> DynamoDB
+        </th>
+        <th width="50%" class="tg-header">
+          <img src='aurora.png' style='width:27px;height:30px;'> Aurora<span class='footnote' data-toggle="tooltip" title="MySQL vs PostgreSQL denoted where necessary"</span>
+        </th>
+      </tr>
+      <tr>
+        <th class="tg-cly1"><strong>tl;dr:</strong> Choose DynamoDB to prioritize <u>Scale and/or Operational Simplicity</u></th>
+        <th class="tg-cly1"><strong>tl;dr:</strong> Choose Aurora to prioritize <u>Features and/or Dynamic Queries</u></th>
+      </tr>
+      <tr>
+        <th class="tg-cly1">DynamoDB is a distributed key value store with one Primary Partition Key, an optional Secondary Sort Key, and Global Secondary Indexes</th>
+        <th class="tg-cly1">Aurora is a fully managed relational database engine that's compatible with MySQL and PostgreSQL featuring a a high-performance storage subsystem.</th>
+      </tr>
+      <tr>
+        <td class="tg-cly1" colspan="2">
+            <p>Both databases provide a similar set of core features:</p>
+            <ul>
+                <li><strong>Transactions (ACID)</strong> - Both <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transactions.html'>DynamoDB</a> and <a href='https://aws.amazon.com/blogs/database/amazon-aurora-under-the-hood-quorum-reads-and-mutating-state/'>Aurora</a> support multi-document ACID transactions.<span class='footnote' data-toggle="tooltip" title="asdf <a class='white' href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transactions.html'>DynamoDB Transactions</a>"</span></li>
+                <li><strong>Available</strong> - Both <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html'>DynamoDB</a> and <a href='https://aws.amazon.com/rds/aurora/faqs/'>Aurora</a> store at least 3 copies of all data across multiple availability zones.</li>
+                <li><strong>Consistent</strong> - Both <a href='https://aws.amazon.com/rds/aurora/faqs/'>DynamoDB</a> and <a href='https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Replication.html'>Aurora</a> support serializable isolation for transactions and strongly consistent reads/writes.</li>
+                <li><strong>Serverless</strong> - Both databases support being consumed from Lambda functions (although DynamoDB is preferred due to IAM simplicity and lack of VPC cold starts)</li>
+                <li><strong>Automatic Backups</strong> - Both <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/BackupRestore.html'>DynamoDB</a> and <a href='https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Backups.html#Aurora.Managing.Backups.Backup'>Aurora</a> support both continuous point-in-time backups for up to 35 days as well as on-demand snapshots.</li>
+            </ul>
+        </td>
+      </tr>
+      <tr>
+        <td class="tg-cly1">
+            <p>DynamoDB provides the following advantages:</p>
+            <ul>
+                <li><strong>No write scaling bottlenecks</strong> - Assuming a good partition key, DynamoDB reads and writes can scale forever.</li>
+                <li><strong>Automatic Auto Scaling</strong> - DynamoDB supports paying per request <a href='https://aws.amazon.com/blogs/aws/amazon-dynamodb-on-demand-no-capacity-planning-and-pay-per-request-pricing/'>on-demand</a> or read/write capacity <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/AutoScaling.html'>auto scaling</a>.</li>
+                <li><strong>No Connection Limits</strong> - DynamoDB does not have a concept of maintaining a connection (because it uses HTTPS), thereby supporting unlimited clients.</li>
+                <li><strong>Centralized Configuration</strong> - All DynamoDB configuration is codified using AWS APIs, meaning that configuration and index creation is done in the <a href='https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html'>resource definition.</a></li>
+                <li><strong>Streaming APIs</strong> - <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html'>DynamoDB Streams</a> supports streaming all changes to a log (similar to a Kinesis Stream). </li>
+                <li><strong>IAM Permissions</strong> - Applications can authenticate automatically using <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/authentication-and-access-control.html'>IAM instance profiles</a> removing the need for user management.</li>
+                <li><strong>The end of upgrades</strong> - All versions of DynamoDB are the same, meaning there never need to be failovers for upgrades or concerns that an upgrade may break something.</li>
+                <li><strong>Multi-Region</strong> - <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html'>DynamoDB Global Tables</a> supports writes across multiple regions (but not transactions).</li>
+                <li><strong>DAX</strong> - DynamoDB features a fully managed, automatically invalidating cache called <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html'>DAX</a> which can speed reads by an order of magnitude.</li>
+            </ul>
+        </td>
+        <td class="tg-cly1">
+            <p>Aurora provides the following advantages:</p>
+            <ul>
+                <li><strong>Features, Features, Features</strong> - MySQL and PostgreSQL have far more features like search, joins, complex queries/types, views, rules, aggregations and more.</li>
+                <li><strong>Dynamic Queries</strong> - MySQL and PostgreSQL support more dynamic queries than DynamoDB, primarily because all data lives on a single host. If you ever want to change your query pattern, you can always add another index to an existing table, or use foreign keys to create a new table and query with a JOIN.</li>
+                <li><strong>Unlimited Transaction Size</strong> - MySQL and PostgreSQL do not have a row maximum for transactions (but may have very large size limitations).</li>
+                <li><strong>Consistent by Default</strong> - MySQL and PostgreSQL reads are consistent by default (although reads sent to an Aurora <a href='https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Replication.html'>read replica are not consistent</a>).</li>
+                <li><strong>Foreign Key Constraints</strong> - MySQL and PostgreSQL support consistency across multiple tables via foreign key constraints.</li>
+            </ul>
+        </td>
+      </tr>
+      <tr>
+        <td class="tg-cly1">
+            <p>DynamoDB carries the following disadvantages:</p>
+            <ul>
+                <li><strong>Less Flexibility</strong> - DynamoDB requires sound up-front schema decisions because changing the primary key requires a migration. However, to support new access patterns beyond your primary partition key, you can add Global Secondary Indexes later, but lose consistency guarantees on reads through those indexes.</li>
+                <li><strong>Secondary Index Consistency</strong> - DynamoDB's global secondary indexes are <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html#GSI.Writes'>eventually consistent</a>, they are essentially async replicated tables.</li>
+                <li><strong>Size Limitations</strong> - DynamoDB items are limited to <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items'>400KB per item</a> (item is analogous to "row" in a relational DB, so all columns including key names need to fit within this limit).</li>
+                <li><strong>Small Transactions</strong> - DynamoDB transaction blocks cannot be larger than <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html#transaction-apis-txwriteitems'>10 operations or 4MB.</a></li>
+            </ul>
+        </td>
+        <td class="tg-cly1">
+            <p>Aurora carries the following disadvantages:</p>
+            <ul>
+                <li><strong>Write Scaling</strong> - Aurora allows for up to <a href='https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Replication.html#Aurora.Replication.Replicas'>16 read replicas</a> but writes and consistent reads can only be made from the primary replica. Vertically scaling (increasing the instance type) of the primary replica is the only way to improve write capacity.</li>
+                <li><strong>Connection Limits</strong> - Aurora is limited to at most <a href='https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/AuroraMySQL.Managing.Performance.html'>6000</a> connections on the largest instance size. Any connections beyond this amount would require a connection pooler like <a href='https://wiki.postgresql.org/wiki/PgBouncer'>PgBouncer</a>.</li>
+                <li><strong>Multi-Region Writes</strong> - Aurora does not support multi-region writes. Aurora MySQL does support <a href='https://aws.amazon.com/rds/aurora/faqs/'>multi-region replicas</a>.</li>
+                <li><strong>No Streaming</strong> - Aurora does not yet support streaming data (ie "change sets" or "streams").</li>
+            </ul>
+        </td>
+      </tr>
+      <tr>
+        <td class="tg-0lax">
+          <p>Helpful resources for DynamoDB</p>
+          <ul>
+              <li><strong><a href='https://docs.aws.amazon.com/dynamodb/index.html'>DynamoDB Documentation</a></strong></li>
+              <li><strong><a href='https://www.youtube.com/watch?v=HaEPXoXVf2k'>Advanced Design Patterns for DynamoDB</a></strong></li>
+              <li><strong><a href='https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf'>Original Dynamo White Paper</a></strong></li>
+          </ul>
+        </td>
+        <td class="tg-0lax">
+          <p>Helpful resources for Aurora</p>
+          <ul>
+            <li><strong><a href='https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/CHAP_AuroraOverview.html'>Aurora Documentation</a></strong></li>
+            <li><strong><a href='https://www.allthingsdistributed.com/files/p1041-verbitski.pdf'>Original Aurora White Paper</a></strong></li>
+          </ul>
+        </td> 
+      </tr>
+    </table>
+    <div class="center">
+      <a href='https://twitter.com/luke_demi_'>
+        <img src='twitter.png' style='width:36px;height:30px;'>
+      </a>
+      <a href='https://twitter.com/luke_demi_'>
+        <img src='github.png' style='width:30px;height:30px;'>
+      </a>
+    </div>
+  </body>
+</html>
