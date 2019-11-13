@@ -85,7 +85,7 @@
                 <li><strong>Less Flexibility</strong> - DynamoDB requires sound up-front schema decisions because changing the primary key requires a migration. However, to support new access patterns beyond your primary partition key, you can add Global Secondary Indexes later, but lose consistency guarantees on reads through those indexes.</li>
                 <li><strong>Secondary Index Consistency</strong> - DynamoDB's global secondary indexes are <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html#GSI.Writes'>eventually consistent</a>, they are essentially async replicated tables.</li>
                 <li><strong>Size Limitations</strong> - DynamoDB items are limited to <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items'>400KB per item</a> (item is analogous to "row" in a relational DB, so all columns including key names need to fit within this limit).</li>
-                <li><strong>Small Transactions</strong> - DynamoDB transaction blocks cannot be larger than <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html#transaction-apis-txwriteitems'>10 operations or 4MB.</a></li>
+                <li><strong>Small Transactions</strong> - DynamoDB transaction blocks cannot be larger than <a href='https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/transaction-apis.html#transaction-apis-txwriteitems'>25 distinct items and the aggregate size of the items in a transaction cannot exceed 4 MB.</a></li>
             </ul>
         </td>
         <td class="tg-cly1">
